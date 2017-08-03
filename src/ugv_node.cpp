@@ -62,22 +62,8 @@ int irscanf_discover_devices(int fd)
 	}
 	return list->dev[0].daddr;
 }
-
-int main(int argc, char **argv)
+int createSocket(int &fd)
 {
-	ros::init(argc, argv, "talker");
-
-	ros::NodeHandle n;
-
-	ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter", 1000);
-
-	ros::Rate loop_rate(10);
-
-	int count = 0;
-	struct sockaddr_irda peer;
-	int daddr = 0;
-	int fd;
-	FILE *stream;
 	int hints;
 
 	/* Create socket */
@@ -95,7 +81,28 @@ int main(int argc, char **argv)
 		perror("setsockopt-hints");
 		exit(-1);
 	}
+}
+int main(int argc, char **argv)
+{
+	ros::init(argc, argv, "talker");
 
+	ros::NodeHandle n;
+
+	ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter", 1000);
+
+	ros::Rate loop_rate(10);
+
+	int count = 0;
+	struct sockaddr_irda peer;
+	int daddr = 0;
+	int fd;
+	FILE *stream;
+
+	if(createSocket(fd) < 0) 
+	{
+		printf("Failed to create socket\n");
+		return -1;
+	}
 	while (ros::ok())
 	{
 		std_msgs::String msg;
@@ -120,7 +127,7 @@ int main(int argc, char **argv)
 		else
 		{
 			peer.sir_family = AF_IRDA;
-			strncpy(peer.sir_name, "MyServer", 25);
+			strncpy(peer.sir_name, "uav", 25);
 			peer.sir_addr = daddr;
 
 			if (connect(fd, (struct sockaddr*) &peer, 
@@ -136,14 +143,18 @@ int main(int argc, char **argv)
 				continue;
 			}
 			printf("Connected!\n");
-			fwrite(buf, 1, strlen(buf), stream);
-			fflush(stream);
+			int cnt=0;
+			while(cnt++<100000) {
+				sprintf(buf, "hello there %i.", cnt);
+				fwrite(buf, 1, strlen(buf), stream);
+				printf("sending %s\n", buf);
+				fflush(stream);
+			}
 			printf("Closing connection...\n");
 			fclose(stream);
-			close (fd);
-
+			createSocket(fd);
 		}
 	}
-
+	close (fd);
 	return 0;
 }
