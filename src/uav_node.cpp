@@ -138,18 +138,19 @@ int main(int argc, char **argv)
 				perror("fdopen");
 				return -1;
 			}
-			printf("Connected!\n");
-
+			printf("Connected!\nReceiving data");
+			int received = 0;
 			do {
-				if((fgets(buf, sizeof(buf), stream) == NULL) ||
-						(buf[0] == 0x3))
-					buf[0] = '\0';
-
-				fwrite(buf, 1, strlen(buf), stdout);
-
-//			} while (buf[0] != '\0');
+				int n = fread(buf, sizeof(int), 1, stream); 
+				if(n == 0) break;
+				received += n;
+				if(received % 1000 == 0)
+				{
+					printf(".");
+					fflush(stdout);
+				}
 			} while (true);
-			fflush(stdout);
+				printf("\nreceived %i values (%i bytes)\n", received,(int)received*(int)sizeof(int));
 			fclose(stream);
 			close(conn_fd);
 			printf("Disconnected!\n");
