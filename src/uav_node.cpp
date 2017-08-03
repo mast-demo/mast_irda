@@ -92,6 +92,8 @@ int main(int argc, char **argv)
 		perror("socket");
 		exit(-1);
 	}
+	// don't block waiting for accept
+	//fcntl(fd, F_SETFL, O_NONBLOCK);
 
 	/* Set the filter used for performing discovery */
 	hints = HINT_COMPUTER | HINT_PDA;
@@ -127,27 +129,31 @@ int main(int argc, char **argv)
 		conn_fd = accept(fd, (struct sockaddr *) &peer, &addrlen);
 		if (conn_fd < 0) {
 			perror("accept");
-			return -1;
 		}
-		stream = fdopen(conn_fd, "r");
-		if(stream == NULL) {
-			perror("fdopen");
-			return -1;
+		else
+		{
+			printf("Connection accepted\n");
+			stream = fdopen(conn_fd, "r");
+			if(stream == NULL) {
+				perror("fdopen");
+				return -1;
+			}
+			printf("Connected!\n");
+
+			do {
+				if((fgets(buf, sizeof(buf), stream) == NULL) ||
+						(buf[0] == 0x3))
+					buf[0] = '\0';
+
+				fwrite(buf, 1, strlen(buf), stdout);
+
+//			} while (buf[0] != '\0');
+			} while (true);
+			fflush(stdout);
+			fclose(stream);
+			close(conn_fd);
+			printf("Disconnected!\n");
 		}
-		printf("Connected!\n");
-
-		do {
-			if((fgets(buf, sizeof(buf), stream) == NULL) ||
-					(buf[0] == 0x3))
-				buf[0] = '\0';
-
-			fwrite(buf, 1, strlen(buf), stdout);
-
-		} while (buf[0] != '\0');
-		fflush(stdout);
-		fclose(stream);
-		close(conn_fd);
-		printf("Disconnected!\n");
 		loop_rate.sleep();
 	}
 
