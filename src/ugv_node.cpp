@@ -143,13 +143,15 @@ int main(int argc, char **argv)
 				continue;
 			}
 			printf("Connected!\n");
+			const int limit = 1000000;
 			int cnt=0;
-			while(cnt++<100000) {
-				sprintf(buf, "hello there %i.", cnt);
-				fwrite(buf, 1, strlen(buf), stream);
-				printf("sending %s\n", buf);
-				fflush(stream);
+			printf("Sending binary data\n");
+			while(cnt<limit) {
+				fwrite(&cnt, sizeof(int), 1, stream);
+				cnt++;
 			}
+		  fflush(stream);
+			printf("sent %i values (%i bytes)\n",cnt, cnt*sizeof(int));
 			printf("Closing connection...\n");
 			fclose(stream);
 			createSocket(fd);
