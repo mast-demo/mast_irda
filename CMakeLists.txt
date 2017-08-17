@@ -133,6 +133,8 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/mast_irda_node.cpp)
+add_executable(receiver_node src/receiver_node.cpp)
+add_executable(sender_node src/sender_node.cpp)
 add_executable(uav_node src/uav_node.cpp)
 add_executable(ugv_node src/ugv_node.cpp)
 add_executable(discover_node src/discover_node.cpp)
@@ -149,6 +151,12 @@ add_executable(discover_node src/discover_node.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(uav_node
+   ${catkin_LIBRARIES}
+)
+target_link_libraries(sender_node
+   ${catkin_LIBRARIES}
+)
+target_link_libraries(receiver_node
    ${catkin_LIBRARIES}
 )
 target_link_libraries(discover_node
