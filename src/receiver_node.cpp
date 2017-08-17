@@ -158,8 +158,8 @@ int main(int argc, char **argv)
 					fflush(stdout);
 				}
 			} while (true);
-				printf("\nreceived %i values (%i bytes)\nWrote to %s", 
-          received,(int)received*(int)sizeof(int),filename);
+				printf("\nreceived %i bytes\nWrote to %s", 
+          received,filename);
 			fclose(stream);
 			close(conn_fd);
 			printf("Disconnected!\n");
